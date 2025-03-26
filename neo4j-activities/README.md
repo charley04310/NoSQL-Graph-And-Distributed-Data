@@ -1,6 +1,21 @@
 # Neo4j Graph Database
 
-![Reset password](./docs/img/neo4j.jpg)
+
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage of Python Script](#usage-of-python-script)
+- [Commands](#commands)
+- [APOC Procedures](#apoc-procedures)
+- [Design of the Graph Database (arrows.app) (24/03/2025)](#design-of-the-graph-database-arrowsapp-24032025)
+- [Activities (24/03/2025)](#activities-24032025)
+- [Neo4j Sandbox : Graph data science (25/03/2025)](#neo4j-sandbox--graph-data-science-25032025)
+- [Neo4j Sandbox : Crime investigation (25/03/2025)](#neo4j-sandbox--crime-investigation-25032025)
+- [Neo4j : DO likes movies (25/03/2025)](#neo4j--do-likes-movies-25032025)
+
+
+![ Neo4J](./docs/img/neo4j.jpg)
 
 ## Introduction
 
@@ -15,9 +30,9 @@ Neo4j is a graph database management system developed by Neo4j, Inc. Described b
 ## Installation
 
 1. Install the `neo4j` library:
-    ```sh
-    pip install neo4j
-    ```
+```sh
+pip install neo4j
+```
 
 2. Ensure that Neo4j is running and accessible.
 

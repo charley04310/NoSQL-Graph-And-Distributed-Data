@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, collect_list
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 
 
 def main():
@@ -8,7 +9,8 @@ def main():
     s3_access_key = "JAEfMra4rwN5kfAelupW"
     s3_secret_key = "h5CxbuAv93e49TOt2ign3Cncqdbatj1nNrw4UdLG"
     s3_bucket = "spark"
-    s3_file_path = "users.csv"
+    s3_users = "users.csv"
+    s3_stackoverflow = "stackoverflow.csv"
 
     # Initialize Spark session
     spark = (
@@ -19,7 +21,9 @@ def main():
         )
         .getOrCreate()
     )
+
     sc = spark.sparkContext
+    sc.setLogLevel("WARN")
 
     # Set S3 configurations
     sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", s3_endpoint)
@@ -31,15 +35,16 @@ def main():
     )
     sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
 
-    # Construct S3 URI
-    s3_uri = f"s3a://{s3_bucket}/{s3_file_path}"
+    # Construct S3 URIs
+    s3_uri = f"s3a://{s3_bucket}/{s3_users}"
+    s3_stackoverflow_uri = f"s3a://{s3_bucket}/{s3_stackoverflow}"
 
-    # Read CSV file from S3
+    # Process users.csv
+    print("\n=== Processing users.csv ===")
     users_df = (
         spark.read.option("header", "true").option("inferSchema", "true").csv(s3_uri)
     )
 
-    # Process the data
     result = (
         users_df.filter(col("age") >= 25)
         .groupBy("city")
@@ -47,12 +52,71 @@ def main():
         .select("city", "names")
     )
 
-    # Collect and print the results
-    result_collected = result.collect()
-    for row in result_collected:
-        city = row["city"]
-        names = row["names"]
-        print(f"Users in {city}: {', '.join(names)}")
+    print("\nUsers grouped by city (age >= 25):")
+    result.show(truncate=False)
+
+    # Define schema for stackoverflow.csv
+    schema = StructType(
+        [
+            StructField("postTypeId", IntegerType(), True),
+            StructField("id", IntegerType(), True),
+            StructField("acceptedAnswer", StringType(), True),
+            StructField("parentId", IntegerType(), True),
+            StructField("score", IntegerType(), True),
+            StructField("tag", StringType(), True),
+        ]
+    )
+
+    # Process stackoverflow.csv
+    print("\n=== Processing stackoverflow.csv ===")
+    stackoverflow_df = (
+        spark.read.option("header", "false")
+        .schema(schema)
+        .csv(s3_stackoverflow_uri)
+        .drop("acceptedAnswer")
+    )
+
+    print(f"\nTotal records in stackoverflow.csv: {stackoverflow_df.count()}")
+    print("\nSchema of stackoverflow.csv:")
+    stackoverflow_df.printSchema()
+
+    print("\nFirst 5 records in stackoverflow.csv:")
+    stackoverflow_df.show(5)
+
+    print("\nCount of null values in specific columns:")
+    print(f" - tag: {stackoverflow_df.filter(col('tag').isNull()).count()}")
+    print(f" - parentId: {stackoverflow_df.filter(col('parentId').isNull()).count()}")
+
+    # Register the DataFrame as a temporary SQL table
+    stackoverflow_df.createOrReplaceTempView("stackoverflow")
+
+    # Query posts with a score greater than 20
+    print("\n=== Posts with score > 20 ===")
+    high_score_posts_sql = spark.sql("SELECT * FROM stackoverflow WHERE score > 20")
+    high_score_posts_sql.show(5)
+
+    # Top 5 posts with the highest scores and non-null tags
+    print("\n=== Top 5 posts with highest scores and non-null tags ===")
+    top5ScoresWithTag = spark.sql("""
+        SELECT id, score, tag
+        FROM stackoverflow
+        WHERE tag IS NOT NULL
+        ORDER BY score DESC
+        LIMIT 5
+    """)
+    top5ScoresWithTag.show()
+
+    # Top 10 most popular tags
+    print("\n=== Top 10 most popular tags ===")
+    popularTags = spark.sql("""
+        SELECT tag, COUNT(*) as frequency
+        FROM stackoverflow
+        WHERE tag IS NOT NULL
+        GROUP BY tag
+        ORDER BY frequency DESC
+        LIMIT 10
+    """)
+    popularTags.show()
 
     # Stop Spark session
     spark.stop()

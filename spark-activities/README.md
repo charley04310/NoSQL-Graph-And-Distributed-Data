@@ -1,4 +1,11 @@
-# Spark and Python using VSCODE 
+# Spark and Python using VSCODE  (26/03/2025)
+![spark](./docs/img/spark.png)
+
+- [Running Self-Contained Applications (counting words)](#running-self-contained-applications-counting-words)
+- [Running Self-Contained Applications (load and store csv file)](#running-self-contained-applications-load-and-store-csv-file)
+- [Connecting Neo4j with Spark](#connecting-neo4j-with-spark)
+
+
 
 1. Install Spark on your local machine
 
@@ -24,13 +31,8 @@ spark-submit
 
 ![spark-shell](./docs/img/spark-shell.png)
 
-4. Install prettytable
 
-```bash
-pip install prettytable
-```
-
-5. Run self-contained applications
+4. Run self-contained applications
 
 ```bash
 spark-submit main.py
@@ -39,7 +41,7 @@ spark-submit main.py
 ![spark-submit](./docs/img/spark-submit.png)
 
 
-# Kubernetes:  Spark Deployment Commands
+# Kubernetes:  Spark Deployment Commands  (27/03/2025)
 
 ## Running Self-Contained Applications (counting words)
 
@@ -155,3 +157,37 @@ kubectl apply -f kube/sparkApplication-minio.yaml
 **Output from K9s**
 
 ![k9s](./docs/img/spark-minio-city-logs.png)
+
+
+5. Print the `Stackoverflow Analysis` from the Spark Application (Using Spark SQL)
+
+```bash
+kubectl apply -f kube/sparkApplication-minio.yaml
+```
+
+![stack](./docs/img/spark-minio-stack.png)
+![stack](./docs/img/spark-minio-stack-2.png)
+
+
+## Connecting Neo4j with Spark
+
+1. Run Python script 
+
+Before running the script make sure you have [the following jars](https://github.com/neo4j/neo4j-spark-connector/releases) in the same directory as the script:
+
+```bash
+spark-submit --jars neo4j-connector-apache-spark_2.12-5.3.5_for_spark_3.jar main-neo4j.py
+```
+
+**Output**:
+
+![neo4j](./docs/img/spark-neo4j.png)
+
+2. Running within a Kubernetes Cluster
+
+```bash
+kubectl apply -f kube/sparkApplication-neo4j.yaml
+```
+
+**Output from K9s**
+
