@@ -10,7 +10,7 @@ spark = (
 
 # Configuration du topic et du broker
 kafka_bootstrap_servers = "my-cluster-kafka-bootstrap:9092"
-kafka_topic = "inputstream-test-newapplication"
+kafka_topic = "inputStream.test.newApplication"
 
 # Lecture du flux Kafka
 df = (

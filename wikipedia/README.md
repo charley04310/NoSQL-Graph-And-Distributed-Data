@@ -104,4 +104,6 @@ Once the producer is running, you can start typing messages.
 kubectl apply -f ./kube/sparkApplication-kafka.yaml
 ```
 
+![kafka-producer](./docs/img/activities-kafka-producer.png)
+
 
