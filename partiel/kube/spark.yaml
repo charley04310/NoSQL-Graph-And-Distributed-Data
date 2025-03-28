@@ -1,0 +1,21 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: final-project
+  namespace: default
+spec:
+  type: Python
+  mode: cluster
+  image: spark:partiel
+  mainApplicationFile: local:///opt/spark/python/main.py
+  deps:
+    jars:
+    - https://github.com/neo4j/neo4j-spark-connector/releases/download/5.3.5/neo4j-connector-apache-spark_2.12-5.3.5_for_spark_3.jar
+  driver:
+    labels:
+      version: 3.5.5
+  executor:
+    instances: 2
+    labels:
+      version: 3.5.5
+  sparkVersion: "3.5.5"
